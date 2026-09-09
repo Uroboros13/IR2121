@@ -1,0 +1,13 @@
+#!/bin/bash
+# Por si acaso, esto hará que funcione tanto en Jazzy (24.04) como en Humble (22.04), espero
+if [ -d "/opt/ros/jazzy" ]; then
+    source /opt/ros/jazzy/setup.bash
+
+elif [ -d "/opt/ros/humble" ]; then
+    source /opt/ros/humble/setup.bash
+else
+    echo "ERROR, Ros2 no encontrado, ¿puede que no esté instalado?"
+    exit 1
+fi
+export ROS_LOCALHOST_ONLY=1
+ros2 bag play rosbag2_2026_09_09-20_24_35
