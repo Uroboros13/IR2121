@@ -1,0 +1,73 @@
+Entendido — vamos a montarlo todo para que puedas hacer **las dos tareas en una sola sesión de laboratorio**, sin depender de que el PC recuerde nada entre reinicios. Antes de la lista completa, hay un detalle técnico que hay que arreglar: tu `config_robot.rviz` está configurado para el robot **simulado** (QoS `Reliable` en el láser), pero el robot **físico** publica `/scan` con QoS `Best Effort`/`Volatile` (lo dice tu propio PDF) — si usas el mismo config sin cambiar esto, no verás el láser en la Tarea 2.Corregido. Ahora te doy el paquete completo, de principio a fin, para hacer las dos tareas en la misma sesión.## El plan completo de la sesión de laboratorio
+
+### FASE 0 — Al llegar, antes de nada
+
+```bash
+git clone https://github.com/TU_USUARIO/IR2121.git
+cd IR2121
+```
+Si ya lo tenías clonado y el PC lo ha "olvidado", vuelve a clonarlo. Copia todos los `.bash`/`.py`/`.rviz` de arriba a `IR2121/Worlds/scripts/` y dales permisos:
+```bash
+chmod +x *.bash
+```
+
+---
+
+### FASE 1 — TASK 1: simulación en Gazebo (edificio TD)
+
+1. `./launch_tb3_empty_sim.bash` → Gazebo vacío
+2. `Edit > Building Editor` → `File > Import` con `TD_n1.png` de fondo → traza las paredes de TD1107AL y alrededores → `File > Save As` (esto crea el modelo)
+3. Sal del editor, panel **Insert** → `Add Path` a la carpeta del modelo → insértalo, colócalo cerca del robot
+4. **3 terminales nuevas** (cada una desde `Worlds/scripts/`):
+   - `./publish_map_td.bash`
+   - `./publish_transform_td.bash`
+   - `./visualize_robot.bash` (el de siempre, no el `_physical`)
+5. **Otra terminal**: `./launch_tb3_teleop.sh` — conduce y mira si el láser encaja con las paredes en RViz. Si no, `Ctrl+C` en la terminal del transform y relanza `publish_transform_td.bash` con otros `--x --y` hasta que encaje.
+6. Cuando encaje: **otra terminal** → `./record_maps_sim.bash`, teleopera 60-90s por la sala, `Ctrl+C`.
+7. `zip -r rosbag2_task1.zip rosbag2_.../`
+8. Captura de pantalla de RViz (mapa + odometría + láser).
+
+**Guarda ya estos dos archivos fuera del PC** (descárgalos a tu nube/email) — el zip del bag y la captura. No hace falta subirlos a Aula Virtual todavía si no quieres, pero sácalos del PC del laboratorio ya, por si acaso.
+
+---
+
+### FASE 2 — Antes de pasar a la Tarea 2: commitea y sube TODO a GitHub
+
+```bash
+cd ~/IR2121
+git add .
+git commit -m "Modelo TD1107AL, mapa, scripts de la práctica de mapas"
+git push origin main
+```
+Esto es crítico: el modelo Gazebo que acabas de construir (`model.sdf`/`model.config`) y todos los scripts nuevos viven solo en el disco de este PC — si no los subes ahora, se pierden con el reinicio.
+
+---
+
+### FASE 3 — TASK 2: robot físico (mismo mapa TD)
+
+1. Coge un robot físico, comprueba su `ROS_DOMAIN_ID` asignado (uso `10` como el de tu práctica anterior — **confírmalo**, puede que hoy te toque otro robot).
+2. **Terminal 1** (SSH al robot): `./bringup_physical.bash` — edítalo antes si el `ROS_DOMAIN_ID` es distinto.
+3. **Terminal 2** (PC): `./publish_map_td_physical.bash`
+4. **Terminal 3** (PC): `./publish_transform_td_physical.bash` — aquí el ajuste `--x --y` será **distinto** al de la simulación, porque ahora depende de dónde coloques físicamente el robot dentro de la sala real. Cotéjalo visualmente en RViz igual que antes.
+5. **Terminal 4** (PC): `./visualize_robot_physical.bash` — este usa el rviz config con el QoS corregido (`Best Effort`) para que el láser real se vea.
+6. **Terminal 5** (PC): `./teleop_physical.bash` — conduce verificando que el láser encaja con las paredes del mapa.
+7. **Terminal 6** (PC): `./record_maps_physical.bash`, 60-90s, `Ctrl+C`.
+8. `zip -r rosbag2_task2.zip rosbag2_.../`
+9. Captura de pantalla de RViz.
+
+---
+
+### FASE 4 — Antes de salir del laboratorio
+
+```bash
+cd ~/IR2121
+git add .
+git commit -m "Bag y resultados de robot físico"
+git push origin main
+```
+
+Y **descarga a tu propio dispositivo** (o email/nube personal) los 4 archivos finales: los dos ZIPs de bags y las dos capturas de pantalla — son los que subirás a las tareas de Aula Virtual (Task 1 vence viernes, Task 2 vence el 30). No dejes nada pendiente de subir solo en el PC del laboratorio.
+
+
+
+
