@@ -1,11 +1,11 @@
 #!/bin/bash
+
 source /opt/ros/humble/setup.bash
 
 export ROS_LOCALHOST_ONLY=1
-BAG_NAME="sim_localization_bag_$(date +%Y%m%d_%H%M%S)"
+export TURTLEBOT3_MODEL=burger
 
-echo "Grabando datos de simulación en: ${BAG_NAME}..."
-ros2 bag record -o ${BAG_NAME} \
+ros2 bag record \
     /clock \
     /map \
     /odom \
