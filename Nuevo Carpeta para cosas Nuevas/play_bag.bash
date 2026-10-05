@@ -2,6 +2,9 @@
 
 source /opt/ros/humble/setup.bash
 
-export ROS_LOCALHOST_ONLY=1
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <bag_directory>"
+    exit 1
+fi
 
 ros2 bag play "$1"
