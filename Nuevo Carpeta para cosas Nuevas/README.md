@@ -151,67 +151,77 @@ más `Worlds/TD_n1.yaml`.
 
 ---
 
-## 4. Task 1 de Localización (AMCL) — enlaza directo, mismo mundo ya abierto
+## 4. Task 1: localización en simulación (AMCL)
 
-Abre terminales nuevas (todas dentro del mismo contenedor: `docker exec -it ir2121_humble bash`
-si quieres una terminal extra sin cerrar la que tiene Gazebo abierto).
+### Qué hace cada script
 
-**Terminal A — empieza grabando ANTES que nada más** (por si luego faltan topics al reproducir):
-```bash
-mkdir -p ~/bags_localizacion && cd ~/bags_localizacion
-"$B"/record_bag_sim.bash
-```
+| Script | Abre ventana | Qué hace |
+|---|---|---|
+| `record_bag_sim.bash` | No | Graba los 9 topics. Espera a que vayan apareciendo, así que se lanza **antes** que nada |
+| `launch_tb3_empty_sim.bash` | Gazebo | Mundo vacío + TurtleBot3 (`/odom`, `/scan`, `/tf`, `/clock`) |
+| `launch_amcl_sim.bash` | **No** | Solo terminal: arranca `map_server` (publica `/map` de `TD_n1.yaml`), **AMCL** (`/amcl_pose`, `/particle_cloud`, transformada `map→odom`) y el resto de Nav2. Repite `Please set the initial pose...` hasta que hagas 2D Pose Estimate: es normal |
+| `visualize_localization.bash` | RViz | Solo muestra; no publica nada salvo cuando usas 2D Pose Estimate |
+| `teleop_sim.bash` | No | Teclado → `/cmd_vel` (la terminal debe tener el foco) |
 
-**Terminal B — AMCL:**
-```bash
-cd "$B"
-./launch_amcl_sim.bash
-```
-*(AMCL lanza su propio `map_server` y calcula él mismo la transformación
-`map → odom` — no necesitas `publish_map.bash` ni `publish_transform.bash`,
-esos son de la tarea anterior sin AMCL.)*
+`/map`, `/tf_static` y `/robot_description` son topics "latched": quien se
+suscribe tarde (RViz, el grabador) los recibe igualmente. Por eso el orden de
+RViz no importa; lo único crítico es que **el grabador empiece primero**
+(consejo del profesor, comprobado: así salen los 9 topics).
 
-**Terminal C — RViz:**
-```bash
-cd "$B/Worlds/scripts"
-./visualize_localization.bash
-```
-En RViz, usa la herramienta **2D Pose Estimate** para marcar dónde está
-realmente el robot en el mapa.
+Ojo: el frame `map` **no existe hasta que haces 2D Pose Estimate**. Todo lo que
+grabes antes saldrá vacío en RViz al reproducir; hazlo en cuanto AMCL esté listo.
 
-**Terminal D — teleoperar:**
-```bash
-cd "$B"
-./teleop_sim.bash
-```
-Conduce por el edificio; verás la nube de partículas converger alrededor de
-la pose real.
+### Pasos (6 terminales, todas con `docker exec -it ir2121_humble bash`)
 
-Tras **60-90 segundos** de movimiento: `Ctrl+C` en la **Terminal A** para parar
-la grabación. Cierra Gazebo, RViz y AMCL.
+1. **Terminal A — grabar:**
+   ```bash
+   mkdir -p ~/bags_task1 && cd ~/bags_task1
+   "$B"/record_bag_sim.bash
+   ```
+2. **Terminal B — Gazebo:**
+   ```bash
+   cd "$B/Worlds/scripts" && ./launch_tb3_empty_sim.bash
+   ```
+   En Gazebo: **Insert** → (Add Path `Worlds/models` si no aparece) → **TD_n1**.
+   Coloca el robot dentro del edificio (World > Models > burger > pose).
+3. **Terminal C — AMCL:**
+   ```bash
+   cd "$B" && ./launch_amcl_sim.bash
+   ```
+   Espera a ver `Managed nodes are active` (unos 10 s).
+4. **Terminal D — RViz:**
+   ```bash
+   cd "$B" && ./visualize_localization.bash
+   ```
+5. **2D Pose Estimate** en RViz: clic en el punto del mapa donde está el robot
+   en Gazebo y arrastra en la dirección a la que mira. Aparecen la flecha de
+   pose, la elipse de covarianza y las partículas. Si el láser (rojo) no cae
+   sobre las paredes, repítelo.
+6. **Terminal E — teleop:**
+   ```bash
+   cd "$B" && ./teleop_sim.bash
+   ```
+   Conduce **60-90 s**; las partículas se van concentrando.
+7. **Terminal A:** `Ctrl+C` para parar la grabación. Después cierra teleop,
+   RViz, AMCL y Gazebo (`Ctrl+C` en cada terminal).
+8. **Captura de RViz** para la entrega: hazla en el paso 6 o durante la verificación.
 
 ---
 
 ## 5. Verificación antes de entregar
 
+Con todo lo anterior cerrado:
 ```bash
-cd "$B/Worlds/scripts"
-./visualize_localization.bash
+cd "$B" && ./visualize_localization.bash                         # Terminal 1
+cd ~/bags_task1 && "$B"/play_bag.bash rosbag2_XXXX/              # Terminal 2
+"$B"/verify_bag.bash ~/bags_task1/rosbag2_XXXX/                  # opcional: lista topics y nº de mensajes
 ```
-En otra terminal:
-```bash
-cd ~/bags_localizacion
-"$B"/play_bag.bash rosbag2_XXXX/
-```
-Confirma en RViz que se ven: mapa, odometría, láser, pose AMCL (con
-covarianza) y la nube de partículas. Haz la captura de pantalla aquí.
+Deben verse mapa, robot, láser, odometría, pose AMCL y partículas desde el
+momento del 2D Pose Estimate. `verify_bag.bash` debe listar los 9 topics.
 
 ```bash
-cd ~/bags_localizacion
-zip -r rosbag2_localizacion.zip rosbag2_XXXX/
+cd ~/bags_task1 && zip -r rosbag2_task1.zip rosbag2_XXXX/
 ```
-
----
 
 ---
 
@@ -271,7 +281,7 @@ cd "$B" && ./teleop_robot.bash N
 Si es un waffle_pi: `TURTLEBOT3_MODEL=waffle_pi ./teleop_robot.bash N`.
 
 Graba **entre 1 y 3 minutos** y para con `Ctrl+C` en la Terminal 3.
-Verifica como en el apartado 5, pero con `./visualize_localization_robot.bash N`.
+Verifica como en el apartado 5 (en casa o sin robot: `visualize_localization.bash` + `play_bag.bash`, todo en local).
 
 Apagado del robot: `Ctrl+C` en el bringup → `sudo halt -p` → espera a que el
 LED amarillo deje de parpadear → apaga → batería al cargador.

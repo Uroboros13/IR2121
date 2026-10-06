@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0'?>
 <sdf version="1.7">
   <model name="TD_n1">
     <pose>-8.28511 -2.84735 0 0 -0 0</pose>

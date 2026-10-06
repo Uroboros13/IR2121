@@ -12,4 +12,6 @@ if [ ! -f "$1/metadata.yaml" ]; then
     exit 1
 fi
 source /opt/ros/humble/setup.bash
+export ROS_LOCALHOST_ONLY=1
+unset ROS_DOMAIN_ID
 ros2 bag play "$1"

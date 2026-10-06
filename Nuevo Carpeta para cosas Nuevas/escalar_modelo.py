@@ -25,15 +25,22 @@ def scale_size(elem, k, k_thickness, k_height):
     elem.text = ' '.join(fmt(x) for x in (v[0] * k, v[1] * k_thickness, v[2] * k_height))
 
 
+def write_xml(tree, path):
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write("<?xml version='1.0'?>\n")
+        f.write(ET.tostring(tree.getroot(), encoding='unicode'))
+        f.write('\n')
+
+
 def rename_model(model_dir, new_name):
     config = os.path.join(model_dir, 'model.config')
     tree = ET.parse(config)
     tree.getroot().find('name').text = new_name
-    tree.write(config, xml_declaration=True, encoding='utf-8')
+    write_xml(tree, config)
     sdf = os.path.join(model_dir, 'model.sdf')
     tree = ET.parse(sdf)
     tree.getroot().find('model').set('name', new_name)
-    tree.write(sdf, xml_declaration=True, encoding='utf-8')
+    write_xml(tree, sdf)
 
 
 def main():
@@ -88,12 +95,12 @@ def main():
     if os.path.isdir(model_dir):
         shutil.rmtree(model_dir)
     os.makedirs(model_dir)
-    tree.write(os.path.join(model_dir, 'model.sdf'), xml_declaration=True, encoding='utf-8')
+    write_xml(tree, os.path.join(model_dir, 'model.sdf'))
     shutil.copy(os.path.join(original_dir, 'model.config'), model_dir)
     config = os.path.join(model_dir, 'model.config')
     ctree = ET.parse(config)
     ctree.getroot().find('name').text = args.nombre
-    ctree.write(config, xml_declaration=True, encoding='utf-8')
+    write_xml(ctree, config)
 
     print(f'Creado {model_dir} con factor {k} '
           f'(grosor x{k_thickness}, altura x{k_height}) a partir de {original_name}')
