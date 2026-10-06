@@ -7,7 +7,4 @@ ros2 bag record \
     /odom \
     /scan \
     /tf \
-    /tf_static \
-    /amcl_pose \
-    /particle_cloud \
-    /robot_description
+    /tf_static
