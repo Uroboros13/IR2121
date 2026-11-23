@@ -1,7 +1,16 @@
-
-Nuevo Carpeta para cosas Nuevas/no subir/rosbag2_2026_10_06-17_40_36/metadata.yaml
-Nuevo Carpeta para cosas Nuevas/no subir/rosbag2_2026_10_06-17_40_36/rosbag2_2026_10_06-17_40_36_0.db3
-MAPPING/FCS MAP/tb3-110_all_2026_11_11-15_26_06.zip
-MAPPING/FCS MAP/tb3-110_all_2026_11_11-15_26_29.zip
-MAPPING/phisical/rosbag_mapping_2026_11_04-14_17_28/rosbag_mapping_2026_11_04-14_17_28_0.db3
-MAPPING/phisical/segundo/rosbag_mapping_2026_11_04-14_42_27/rosbag_mapping_2026_11_04-14_42_27_0.db3
+build/
+install/
+log/
+__pycache__/
+.~lock*
+*.swp
+no subir/
+APUNTES_*
+CHULETA_*
+wuolah-free-RESUMENNAT.pdf
+ca.psiphon.PsiphonTunnel.tunnel-core/
+03_mapas_y_localizacion/no subir/rosbag2_2026_10_06-17_40_36/rosbag2_2026_10_06-17_40_36_0.db3
+06_mapeado_robot_fisico/rosbag_mapping_2026_11_04-14_17_28/rosbag_mapping_2026_11_04-14_17_28_0.db3
+06_mapeado_robot_fisico/segundo/rosbag_mapping_2026_11_04-14_42_27/rosbag_mapping_2026_11_04-14_42_27_0.db3
+07_mapeado_FCS/tb3-110_all_2026_11_11-15_26_06.zip
+07_mapeado_FCS/tb3-110_all_2026_11_11-15_26_29.zip
