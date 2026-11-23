@@ -1,0 +1,36 @@
+[INFO] [launch]: All log files can be found below /home/ubuntu/.ros/log/2026-11-09-16-55-23-974921-tb3-110-1401
+[INFO] [launch]: Default logging verbosity is set to INFO
+urdf_file_name : turtlebot3_burger.urdf
+[INFO] [robot_state_publisher-1]: process started with pid [1427]
+[INFO] [hlds_laser_publisher-2]: process started with pid [1429]
+[INFO] [turtlebot3_ros-3]: process started with pid [1431]
+[hlds_laser_publisher-2] [INFO] [1794243324.979572194] [hlds_laser_publisher]: Init hlds_laser_publisher Node Main
+[hlds_laser_publisher-2] [INFO] [1794243324.982227231] [hlds_laser_publisher]: port : /dev/ttyUSB0 frame_id : base_scan
+[turtlebot3_ros-3] [INFO] [1794243324.993727657] [turtlebot3_node]: Init TurtleBot3 Node Main
+[turtlebot3_ros-3] [INFO] [1794243324.996192768] [turtlebot3_node]: Init DynamixelSDKWrapper
+[turtlebot3_ros-3] [INFO] [1794243325.000221823] [DynamixelSDKWrapper]: Succeeded to open the port(/dev/ttyACM0)!
+[turtlebot3_ros-3] [INFO] [1794243325.007950971] [DynamixelSDKWrapper]: Succeeded to change the baudrate!
+[turtlebot3_ros-3] [INFO] [1794243325.044156731] [turtlebot3_node]: Start Calibration of Gyro
+[robot_state_publisher-1] [INFO] [1794243325.064878601] [robot_state_publisher]: got segment base_footprint
+[robot_state_publisher-1] [INFO] [1794243325.065186768] [robot_state_publisher]: got segment base_link
+[robot_state_publisher-1] [INFO] [1794243325.065241823] [robot_state_publisher]: got segment base_scan
+[robot_state_publisher-1] [INFO] [1794243325.065278786] [robot_state_publisher]: got segment caster_back_link
+[robot_state_publisher-1] [INFO] [1794243325.065314027] [robot_state_publisher]: got segment imu_link
+[robot_state_publisher-1] [INFO] [1794243325.065346582] [robot_state_publisher]: got segment wheel_left_link
+[robot_state_publisher-1] [INFO] [1794243325.065378453] [robot_state_publisher]: got segment wheel_right_link
+[turtlebot3_ros-3] [INFO] [1794243330.044439450] [turtlebot3_node]: Calibration End
+[turtlebot3_ros-3] [INFO] [1794243330.044619950] [turtlebot3_node]: Add Motors
+[turtlebot3_ros-3] [INFO] [1794243330.045223487] [turtlebot3_node]: Add Wheels
+[turtlebot3_ros-3] [INFO] [1794243330.045726598] [turtlebot3_node]: Add Sensors
+[turtlebot3_ros-3] [INFO] [1794243330.054539839] [turtlebot3_node]: Succeeded to create battery state publisher
+[turtlebot3_ros-3] [INFO] [1794243330.058574617] [turtlebot3_node]: Succeeded to create imu publisher
+[turtlebot3_ros-3] [INFO] [1794243330.067984542] [turtlebot3_node]: Succeeded to create sensor state publisher
+[turtlebot3_ros-3] [INFO] [1794243330.078748117] [turtlebot3_node]: Succeeded to create joint state publisher
+[turtlebot3_ros-3] [INFO] [1794243330.078880987] [turtlebot3_node]: Add Devices
+[turtlebot3_ros-3] [INFO] [1794243330.078925579] [turtlebot3_node]: Succeeded to create motor power server
+[turtlebot3_ros-3] [INFO] [1794243330.083674987] [turtlebot3_node]: Succeeded to create reset server
+[turtlebot3_ros-3] [INFO] [1794243330.088626746] [turtlebot3_node]: Succeeded to create sound server
+[turtlebot3_ros-3] [INFO] [1794243330.091008265] [turtlebot3_node]: Run!
+[turtlebot3_ros-3] [INFO] [1794243330.131369635] [diff_drive_controller]: Init Odometry
+[turtlebot3_ros-3] [INFO] [1794243330.151307672] [diff_drive_controller]: Run!
+[turtlebot3_ros-3] [ERROR] [1794243461.653449472] [DynamixelSDKWrapper]: Failed to read[[TxRxResult] There is no status packet!]

@@ -1,0 +1,6 @@
+robot: tb3-110
+fecha: 2026-11-09 17:36:27
+ROS_DOMAIN_ID: 10
+modelo: burger
+laser: LDS-01
+ros: humble

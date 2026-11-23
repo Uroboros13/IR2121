@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Mando TurtleBot3</title>
+<style>
+:root{--bg:#10151c;--panel:#1a222d;--line:#2a3442;--text:#e8edf3;--muted:#8b97a7;--ok:#3ecf8e;--warn:#f5b84a;--bad:#ef5b5b;--acc:#4ea1ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.35 system-ui,-apple-system,Roboto,sans-serif}
+body{padding:12px 12px 24px;max-width:720px;margin:0 auto;user-select:none;-webkit-user-select:none}
+h1{font-size:17px;margin:0}
+header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+header .grow{flex:1}
+.dot{width:11px;height:11px;border-radius:50%;background:var(--bad);flex:none}
+.dot.on{background:var(--ok)}
+.small{font-size:12.5px;color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.panel h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input{background:#0d1218;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:10px;font-size:15px;min-width:0}
+button{border:0;border-radius:10px;padding:12px 10px;font-size:14.5px;font-weight:600;color:var(--text);background:#263142}
+button:active{filter:brightness(1.25)}
+button:disabled{opacity:.4}
+button.primary{background:var(--acc);color:#04121f}
+button.danger{background:var(--bad);color:#1f0505}
+button.on{background:#1d4733;color:#bff5dc;box-shadow:inset 0 0 0 2px var(--ok)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;min-height:62px}
+.grid button .n{font-size:11px;color:var(--muted);font-weight:500}
+.grid button.on .n{color:#9fdcc0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12.5px;padding:5px 9px;border-radius:999px;background:#222c39;color:var(--muted)}
+.chip.ok{background:#173a2b;color:#9ff0c9}.chip.warn{background:#3d3015;color:#ffd894}.chip.bad{background:#40191b;color:#ffb3b3}
+#msg{font-size:13px;color:var(--muted);min-height:18px;margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+#joyWrap{display:flex;gap:12px;align-items:center}
+#joy{touch-action:none;border-radius:50%;background:radial-gradient(circle,#223044 0,#18212d 70%);border:1px solid var(--line);flex:none}
+.side{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+.big{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+#stop{padding:18px 10px;font-size:18px}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tabs button{flex:1;padding:9px}
+#keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#keys button{font-size:22px;padding:16px 0}
+#keys button small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+#mapBox{background:#0d1218;border-radius:8px;min-height:120px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#map{width:100%;height:auto;max-height:65vh;object-fit:contain;image-rendering:pixelated;display:none}
+#found button{margin:4px 6px 0 0}
+.file{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.file:first-child{border-top:0}
+.file .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.file button{padding:9px 12px;flex:none}
+#dlBar{height:8px;border-radius:4px;background:#0d1218;overflow:hidden;margin-top:8px}
+#dlBar div{height:100%;width:0;background:var(--acc);transition:width .3s}
+label.chk{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <div class="dot" id="dot"></div>
+  <div class="grow"><h1 id="title">Mando TurtleBot3</h1><div class="small" id="sub">Sin conexión</div></div>
+  <div class="small" id="bat"></div>
+</header>
+
+<div class="panel" id="connPanel">
+  <h2>Conexión</h2>
+  <div class="row" style="margin-bottom:8px">
+    <button class="primary" id="scan">Buscar robot</button>
+    <span class="small" id="scanInfo">Activa «Compartir conexión por USB» en el móvil y conecta el cable al robot.</span>
+  </div>
+  <div id="found"></div>
+  <div class="row" style="margin-top:8px">
+    <input id="ip" placeholder="IP del robot" inputmode="decimal" style="flex:2">
+    <input id="pin" placeholder="PIN" inputmode="numeric" style="flex:1">
+    <button id="connect">Conectar</button>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Estado</h2>
+  <div class="chips" id="chips"><span class="chip">Sin datos</span></div>
+  <div id="msg"></div>
+</div>
+
+<div class="panel">
+  <h2>Scripts</h2>
+  <div class="grid">
+    <button data-toggle="bringup"><span>1 · Bringup</span><span class="n">launch_turtlebot.bash</span></button>
+    <button id="check"><span>2 · Comprobar láser</span><span class="n">check_scan.bash</span></button>
+    <button data-toggle="slam"><span>3 · SLAM</span><span class="n">slam.bash (Cartographer)</span></button>
+    <button data-toggle="record"><span>4 · Grabar bag</span><span class="n">record.bash</span></button>
+    <button data-toggle="auto_save"><span>5 · Autoguardado</span><span class="n">auto_save.bash</span></button>
+    <button id="save"><span>Guardar mapa ahora</span><span class="n">save.bash</span></button>
+  </div>
+  <div class="row" style="margin-top:8px;justify-content:space-between">
+    <label class="chk"><input type="checkbox" id="newSave"> Empezar en map_00 (new_save)</label>
+    <label class="chk">cada <input id="every" value="45" inputmode="numeric" style="width:56px;padding:6px"> s</label>
+  </div>
+  <button class="danger" id="stopAll" style="width:100%;margin-top:10px">Parar todo (en orden)</button>
+  <button id="powerOff" style="width:100%;margin-top:8px">Apagar robot</button>
+</div>
+
+<div class="panel">
+  <h2>6 · Teleoperación</h2>
+  <div class="tabs"><button id="modeJoy">Joystick</button><button id="modeKeys">Teclas (W A S D X)</button></div>
+  <div id="joyMode">
+    <div id="joyWrap">
+      <canvas id="joy" width="220" height="220"></canvas>
+      <div class="side">
+        <div><span class="small">Lineal</span><div class="big" id="vLin">0.00</div></div>
+        <div><span class="small">Angular</span><div class="big" id="vAng">0.00</div></div>
+        <label class="small">Velocidad <span id="spdTxt">50%</span><input type="range" id="spd" min="10" max="100" value="50" style="width:100%"></label>
+      </div>
+    </div>
+    <div class="small" style="margin-top:6px">Arrastra el círculo: arriba avanza, abajo retrocede, a los lados gira. Al soltar se para.</div>
+  </div>
+  <div id="keysMode" class="hidden">
+    <div class="row" style="justify-content:space-around;margin-bottom:10px">
+      <div><span class="small">Lineal</span><div class="big" id="kLin">0.00</div></div>
+      <div><span class="small">Angular</span><div class="big" id="kAng">0.00</div></div>
+    </div>
+    <div id="keys">
+      <span></span><button data-k="w">W<small>más rápido</small></button><span></span>
+      <button data-k="a">A<small>gira izq.</small></button><button data-k="s" class="danger">S<small style="color:#3a0a0a">parar</small></button><button data-k="d">D<small>gira dcha.</small></button>
+      <button data-k="z">Z<small>sin giro</small></button><button data-k="x">X<small>más lento / atrás</small></button><span></span>
+    </div>
+    <div class="row" style="margin-top:8px;justify-content:space-between">
+      <label class="chk">Paso lineal <select id="stepL" style="background:#0d1218;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:4px"><option value="0.01">0,01 m/s</option><option value="0.02" selected>0,02 m/s</option><option value="0.05">0,05 m/s</option></select></label>
+      <label class="chk">Paso giro <select id="stepA" style="background:#0d1218;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:4px"><option value="0.05">0,05 rad/s</option><option value="0.1" selected>0,1 rad/s</option><option value="0.2">0,2 rad/s</option></select></label>
+    </div>
+    <div class="small" style="margin-top:6px">Como teleop_keyboard: cada pulsación sube o baja la velocidad y el robot la mantiene. Z quita el giro para ir recto; S lo para del todo. Con teclado físico también valen las teclas W A S D X Z y la barra espaciadora.</div>
+  </div>
+  <button class="danger" id="stop" style="width:100%;margin-top:10px">STOP</button>
+  <div class="small" style="margin-top:6px">Si se corta la conexión, el robot se para solo en medio segundo.</div>
+</div>
+
+<div class="panel">
+  <h2>Guardar en el móvil</h2>
+  <div class="row">
+    <button id="files" style="flex:1">Ver datos del robot</button>
+    <button class="danger hidden" id="dlCancel">Cancelar</button>
+  </div>
+  <div id="fileList" style="margin-top:8px"></div>
+  <div id="dlBox" class="hidden"><div id="dlBar"><div></div></div><div class="small" id="dlTxt" style="margin-top:6px"></div></div>
+  <div class="small" style="margin-top:6px">Se guarda como .zip en Descargas/TB3 del móvil. Para el robot antes de descargar: mientras graba no se descarga ese bag.</div>
+</div>
+
+<div class="panel">
+  <h2>Mapa</h2>
+  <div id="mapBox"><img id="map" alt="mapa"><span class="small" id="mapTxt">Sin mapa (lanza el SLAM)</span></div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const store = {get(k,d){try{return localStorage.getItem(k)??d}catch(e){return d}}, set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let base = null, pin = store.get('pin',''), status = null, connected = false;
+$('#ip').value = store.get('ip',''); $('#pin').value = pin;
+
+function say(t, cls){ $('#msg').textContent = t || ''; }
+async function api(path, opt={}, ms=4000){
+  if(!base) throw new Error('sin conexión');
+  const c = new AbortController(); const t = setTimeout(()=>c.abort(), ms);
+  try{
+    const r = await fetch(base+path, {...opt, signal:c.signal, headers:{'X-Token':pin,'Content-Type':'application/json',...(opt.headers||{})}});
+    if(r.status===401) throw new Error('PIN incorrecto');
+    return r;
+  } finally { clearTimeout(t); }
+}
+async function post(path, body={}, ms=8000){ const r = await api(path,{method:'POST',body:JSON.stringify(body)},ms); return r.json(); }
+
+async function connect(ip){
+  ip = (ip||$('#ip').value).trim(); pin = $('#pin').value.trim();
+  if(!ip){ say('Escribe la IP o pulsa «Buscar robot».'); return; }
+  base = 'http://'+ip+':8080'; store.set('ip',ip); store.set('pin',pin);
+  say('Conectando con '+ip+'…');
+  try{ await refresh(true); say('Conectado a '+ip+'.'); $('#connPanel').classList.add('hidden'); }
+  catch(e){ connected=false; say('No conecta con '+ip+': '+e.message); paint(); }
+}
+$('#connect').onclick = ()=>connect();
+
+$('#scan').onclick = ()=>{
+  $('#found').innerHTML=''; $('#scanInfo').textContent='Buscando en la red USB…';
+  if(window.Android && Android.discover){ Android.discover(8080); }
+  else { $('#scanInfo').textContent='La búsqueda automática solo funciona dentro de la app. Escribe la IP.'; }
+};
+window.onDiscover = (list)=>{
+  if(!list.length){ $('#scanInfo').textContent='No encontrado. ¿Está el robot encendido, el cable puesto y «Compartir conexión por USB» activado?'; return; }
+  $('#scanInfo').textContent='Encontrado:';
+  $('#found').innerHTML='';
+  list.forEach(r=>{ const b=document.createElement('button'); b.textContent=r.robot+' · '+r.ip; b.onclick=()=>{$('#ip').value=r.ip; connect(r.ip);}; $('#found').appendChild(b); });
+  if(list.length===1 && $('#pin').value.trim()){ $('#ip').value=list[0].ip; connect(list[0].ip); }
+};
+window.onDiscoverInfo = (t)=>{ $('#scanInfo').textContent=t; };
+
+async function refresh(throwOnError){
+  try{
+    const r = await api('/api/status'); status = await r.json(); connected = true;
+  }catch(e){ connected=false; status=null; if(throwOnError) throw e; }
+  paint();
+}
+
+function chip(text, cls){ return '<span class="chip '+(cls||'')+'">'+text+'</span>'; }
+function paint(){
+  $('#dot').classList.toggle('on', connected);
+  if(!connected || !status){
+    $('#sub').textContent = base ? 'Sin conexión con el robot' : 'Sin conexión';
+    $('#chips').innerHTML = chip('Sin datos'); $('#bat').textContent='';
+    if(base) $('#connPanel').classList.remove('hidden');
+    return;
+  }
+  const s = status;
+  $('#title').textContent = s.robot; $('#sub').textContent = 'ROS_DOMAIN_ID '+s.domain_id+' · '+base.replace('http://','');
+  $('#bat').textContent = s.battery_v ? s.battery_v.toFixed(1)+' V' : '';
+  $('#bat').style.color = s.battery_v && s.battery_v < 11.0 ? 'var(--bad)' : '';
+  const sc = s.scan;
+  let h = '';
+  h += chip('Bringup '+(s.running.bringup?'en marcha':(s.external_bringup?'externo':'parado')), s.running.bringup||s.external_bringup?'ok':'');
+  h += chip(sc.hz ? ('Láser '+sc.hz+' Hz · '+sc.valid+'/'+sc.total) : 'Sin /scan', sc.ok?'ok':(sc.hz?'warn':'bad'));
+  h += chip('Odom '+(s.odom?'OK':'no'), s.odom?'ok':'bad');
+  h += chip('SLAM '+(s.running.slam?'en marcha':(s.available.slam?'parado':'no instalado')), s.running.slam?'ok':(s.available.slam?'':'warn'));
+  h += chip(s.running.record?'Grabando':'Sin grabar', s.running.record?'bad':'');
+  h += chip('Autoguardado '+(s.auto_save?'activo':'parado'), s.auto_save?'ok':'');
+  if(s.battery_v && s.battery_v < 11.0) h += chip('Batería baja','bad');
+  $('#chips').innerHTML = h;
+  document.querySelectorAll('[data-toggle]').forEach(b=>{
+    const n=b.dataset.toggle; const on = n==='auto_save' ? s.auto_save : s.running[n];
+    b.classList.toggle('on', !!on);
+  });
+  if(s.last_message && !paintedMsg.has(s.last_message)){ paintedMsg.add(s.last_message); say(s.last_message); }
+}
+const paintedMsg = new Set();
+
+document.querySelectorAll('[data-toggle]').forEach(b=>{
+  b.onclick = async ()=>{
+    if(!connected){ say('Primero conecta con el robot.'); return; }
+    const n = b.dataset.toggle; const on = b.classList.contains('on');
+    b.disabled = true; say((on?'Parando ':'Arrancando ')+n+'…');
+    try{
+      const body = n==='auto_save' ? {seconds: parseInt($('#every').value)||45, reset: $('#newSave').checked} : {};
+      const r = await post('/api/'+(on?'stop':'start')+'/'+n, body, 70000);
+      say(r.message); if(n==='auto_save' && !on) $('#newSave').checked=false;
+    }catch(e){ say('Error: '+e.message); }
+    b.disabled = false; refresh();
+  };
+});
+$('#check').onclick = async ()=>{
+  if(!connected){ say('Primero conecta con el robot.'); return; }
+  say('Midiendo el láser…');
+  try{ const r = await (await api('/api/check_scan')).json(); say(r.text); }catch(e){ say('Error: '+e.message); }
+};
+$('#save').onclick = async ()=>{
+  if(!connected){ say('Primero conecta con el robot.'); return; }
+  say('Guardando mapa…');
+  try{ const r = await post('/api/save_map',{reset:$('#newSave').checked},60000); say(r.message); $('#newSave').checked=false; }catch(e){ say('Error: '+e.message); }
+};
+$('#stopAll').onclick = async ()=>{
+  if(!connected){ say('Primero conecta con el robot.'); return; }
+  say('Parando en orden: robot, autoguardado, grabación, SLAM y bringup…');
+  try{ const r = await post('/api/stop_all',{},120000); say(r.message); }catch(e){ say('Error: '+e.message); }
+  refresh();
+};
+
+function mb(b){ return b>=1e9 ? (b/1e9).toFixed(2)+' GB' : (b/1e6).toFixed(b<1e7?1:0)+' MB'; }
+let dlBusy = false;
+async function listFiles(){
+  if(!connected){ say('Primero conecta con el robot.'); return; }
+  $('#fileList').innerHTML = '<span class="small">Leyendo…</span>';
+  try{
+    const r = await (await api('/api/files')).json();
+    $('#fileList').innerHTML = '';
+    r.items.forEach(it=>{
+      const row = document.createElement('div'); row.className='file';
+      row.innerHTML = '<div class="grow"><div></div><div class="small"></div></div>';
+      row.querySelector('.grow div').textContent = it.label;
+      row.querySelector('.small').textContent = it.busy ? 'grabando ahora' : mb(it.size);
+      const b = document.createElement('button'); b.textContent = 'Descargar'; b.disabled = it.busy;
+      b.onclick = ()=>download(it);
+      row.appendChild(b); $('#fileList').appendChild(row);
+    });
+  }catch(e){ $('#fileList').innerHTML=''; say('Error: '+e.message); }
+}
+function download(it){
+  if(dlBusy) return;
+  if(!(window.Android && Android.download)){ window.open(base+'/api/download?item='+encodeURIComponent(it.id)+'&token='+encodeURIComponent(pin)); return; }
+  dlBusy = true; document.querySelectorAll('#fileList button').forEach(b=>b.disabled=true);
+  $('#dlBox').classList.remove('hidden'); $('#dlCancel').classList.remove('hidden');
+  $('#dlBar div').style.width='0'; $('#dlTxt').textContent='Preparando '+it.label+'…';
+  Android.download(base+'/api/download?item='+encodeURIComponent(it.id), pin);
+}
+window.onDownloadProgress = (done,total,speed)=>{
+  const pct = total ? Math.min(100, done*100/total) : 0;
+  $('#dlBar div').style.width = pct.toFixed(1)+'%';
+  $('#dlTxt').textContent = mb(done)+(total?' de '+mb(total)+' · '+pct.toFixed(0)+'%':'')+(speed?' · '+mb(speed)+'/s':'');
+};
+window.onDownloadDone = (ok,text)=>{
+  dlBusy = false; $('#dlCancel').classList.add('hidden');
+  if(ok){ $('#dlBar div').style.width='100%'; $('#dlTxt').textContent='Guardado en '+text; say('Guardado en '+text); }
+  else { $('#dlTxt').textContent='No se ha descargado: '+text; say('Descarga fallida: '+text); }
+  listFiles();
+};
+$('#files').onclick = listFiles;
+$('#dlCancel').onclick = ()=>{ if(window.Android && Android.cancelDownload) Android.cancelDownload(); };
+
+let offArmed = 0;
+$('#powerOff').onclick = async ()=>{
+  if(!connected){ say('Primero conecta con el robot.'); return; }
+  if(dlBusy){ say('Espera a que termine la descarga antes de apagar.'); return; }
+  if(Date.now() - offArmed > 4000){ offArmed = Date.now(); $('#powerOff').textContent = 'Pulsa otra vez para apagar'; say('Se parará todo y el robot se apagará. ¿Ya has descargado los datos?'); setTimeout(()=>{ $('#powerOff').textContent='Apagar robot'; }, 4000); return; }
+  offArmed = 0; $('#powerOff').textContent = 'Apagar robot';
+  say('Parando todo y apagando…');
+  try{ const r = await post('/api/shutdown',{},120000); say(r.message+'\nCuando la luz verde de la Raspberry deje de parpadear (unos 20 s), ya puedes darle al interruptor.'); }catch(e){ say('Error: '+e.message); }
+};
+
+const joy = $('#joy'), ctx = joy.getContext('2d');
+let jx=0, jy=0, active=false, sendTimer=null;
+function sizeJoy(){ const s = Math.min(220, Math.floor(window.innerWidth*0.5)); joy.width=s; joy.height=s; drawJoy(); }
+function drawJoy(){
+  const w=joy.width, r=w/2, kr=w*0.17;
+  ctx.clearRect(0,0,w,w);
+  ctx.strokeStyle='#2f3d50'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(r,6); ctx.lineTo(r,w-6); ctx.moveTo(6,r); ctx.lineTo(w-6,r); ctx.stroke();
+  const x = r + jx*(r-kr), y = r - jy*(r-kr);
+  ctx.fillStyle = active ? '#4ea1ff' : '#3a4a60';
+  ctx.beginPath(); ctx.arc(x,y,kr,0,Math.PI*2); ctx.fill();
+}
+function setFromEvent(e){
+  const rc = joy.getBoundingClientRect(), r = rc.width/2, kr = rc.width*0.17;
+  let dx = (e.clientX - rc.left - r)/(r-kr), dy = -(e.clientY - rc.top - r)/(r-kr);
+  const m = Math.hypot(dx,dy); if(m>1){ dx/=m; dy/=m; }
+  jx = Math.abs(dx)<0.08?0:dx; jy = Math.abs(dy)<0.08?0:dy; drawJoy(); showVel();
+}
+function vel(){
+  const f = parseInt($('#spd').value)/100, s = status || {max_lin:0.22, max_ang:2.0};
+  return {lin: +(jy*s.max_lin*f).toFixed(3), ang: +(-jx*s.max_ang*f).toFixed(3)};
+}
+function showVel(){ const v = vel(); $('#vLin').textContent=v.lin.toFixed(2); $('#vAng').textContent=v.ang.toFixed(2); }
+let mode = store.get('mode','joy'), kl = 0, ka = 0;
+function curVel(){ return mode==='keys' ? {lin:kl, ang:ka} : vel(); }
+async function sendVel(){ if(!connected) return; try{ await post('/api/cmd_vel', curVel(), 1500); }catch(e){} }
+function showKeys(){ $('#kLin').textContent=kl.toFixed(2); $('#kAng').textContent=ka.toFixed(2); }
+function keyCmd(k){
+  const s = status || {max_lin:0.22, max_ang:2.0};
+  const sl = parseFloat($('#stepL').value), sa = parseFloat($('#stepA').value);
+  const r2 = v => Math.round(v*100)/100;
+  if(k==='w') kl = r2(Math.min(s.max_lin, kl+sl));
+  else if(k==='x') kl = r2(Math.max(-s.max_lin, kl-sl));
+  else if(k==='a') ka = r2(Math.min(s.max_ang, ka+sa));
+  else if(k==='d') ka = r2(Math.max(-s.max_ang, ka-sa));
+  else if(k==='z') ka = 0;
+  else if(k==='s' || k===' '){ kl = 0; ka = 0; }
+  else return false;
+  showKeys();
+  if(kl===0 && ka===0){ clearInterval(sendTimer); sendTimer=null; if(connected) post('/api/stop',{},1500).catch(()=>{}); }
+  else { sendVel(); if(!sendTimer) sendTimer=setInterval(sendVel,100); }
+  return true;
+}
+document.querySelectorAll('#keys button').forEach(b=>{ b.onclick = ()=>keyCmd(b.dataset.k); });
+document.addEventListener('keydown', e=>{ if(mode!=='keys' || e.target.tagName==='INPUT' || e.target.tagName==='SELECT') return; if(keyCmd(e.key.toLowerCase())) e.preventDefault(); });
+function setMode(m){
+  release(); mode=m; store.set('mode',m);
+  $('#joyMode').classList.toggle('hidden', m!=='joy'); $('#keysMode').classList.toggle('hidden', m!=='keys');
+  $('#modeJoy').classList.toggle('on', m==='joy'); $('#modeKeys').classList.toggle('on', m==='keys');
+}
+$('#modeJoy').onclick = ()=>setMode('joy'); $('#modeKeys').onclick = ()=>setMode('keys');
+joy.addEventListener('pointerdown', e=>{ active=true; joy.setPointerCapture(e.pointerId); setFromEvent(e); sendVel(); clearInterval(sendTimer); sendTimer=setInterval(sendVel,100); });
+joy.addEventListener('pointermove', e=>{ if(active) setFromEvent(e); });
+function release(){ active=false; jx=0; jy=0; kl=0; ka=0; drawJoy(); showVel(); if(typeof showKeys==='function') showKeys(); clearInterval(sendTimer); sendTimer=null; if(connected) post('/api/stop',{},1500).catch(()=>{}); }
+joy.addEventListener('pointerup', ()=>{ if(mode==='joy') release(); }); joy.addEventListener('pointercancel', release);
+$('#stop').onclick = release;
+$('#spd').oninput = ()=>{ $('#spdTxt').textContent=$('#spd').value+'%'; showVel(); };
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) release(); });
+window.addEventListener('resize', sizeJoy); sizeJoy(); setMode(mode);
+
+let mapUrl = null;
+async function refreshMap(){
+  if(!connected || !status || status.map_age===null){ return; }
+  try{
+    const r = await api('/api/map.png', {}, 8000); if(!r.ok) return;
+    const blob = await r.blob(); if(mapUrl) URL.revokeObjectURL(mapUrl);
+    mapUrl = URL.createObjectURL(blob); $('#map').src = mapUrl; $('#map').style.display='block'; $('#mapTxt').style.display='none';
+  }catch(e){}
+}
+setInterval(()=>{ if(base) refresh(); }, 1500);
+setInterval(refreshMap, 3000);
+if($('#ip').value && pin) connect($('#ip').value);
+</script>
+</body>
+</html>

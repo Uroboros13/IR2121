@@ -1,0 +1,16 @@
+[INFO] [1794469350.675945376] [rosbag2_storage]: Opened database 'rosbag_mapping_2026_11_11-14_40_02_sensores/rosbag_mapping_2026_11_11-14_40_02_sensores_0.db3' for READ_WRITE.
+[INFO] [1794469350.677942753] [rosbag2_storage]: Opened database 'bags/rosbag_mapping_2026_11_11-14_40_02/rosbag_mapping_2026_11_11-14_40_02_0.db3' for READ_ONLY.
+Bag preparado: 36168 mensajes de sensores, 0 TF map->odom antiguos quitados
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_00
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_01
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_02
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_03
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_04
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_05
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_06
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_07
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_08
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_09
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_10
+Guardado mapas_rosbag_mapping_2026_11_11-14_40_02/map_11
+Mapas en mapas_rosbag_mapping_2026_11_11-14_40_02
