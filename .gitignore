@@ -14,3 +14,8 @@ ca.psiphon.PsiphonTunnel.tunnel-core/
 06_mapeado_robot_fisico/segundo/rosbag_mapping_2026_11_04-14_42_27/rosbag_mapping_2026_11_04-14_42_27_0.db3
 07_mapeado_FCS/tb3-110_all_2026_11_11-15_26_06.zip
 07_mapeado_FCS/tb3-110_all_2026_11_11-15_26_29.zip
+eliminacion/
+tb3_mando/
+*.apk
+*.keystore
+*.jks

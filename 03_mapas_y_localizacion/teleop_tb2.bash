@@ -5,14 +5,8 @@ DOMAIN_ID=${1:-25}
 # Tópico por defecto = /cmd_vel
 TOPIC_VEL=${2:-/cmd_vel}
 
-# 1. Cargar ROS 2 Jazzy
-if [ -f /opt/ros/jazzy/setup.bash ]; then
-    source /opt/ros/jazzy/setup.bash
-elif [ -f /opt/ros/humble/setup.bash ]; then
-    source /opt/ros/humble/setup.bash
-fi
+source /opt/ros/humble/setup.bash
 
-# 2. Cargar el workspace de Kobuki[cite: 1]
 if [ -f ~/kobuki_ws/install/setup.bash ]; then
     source ~/kobuki_ws/install/setup.bash
 fi

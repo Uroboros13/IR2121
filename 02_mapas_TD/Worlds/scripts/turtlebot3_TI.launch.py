@@ -1,57 +1,37 @@
-#!/usr/bin/env python3
-#
-# Copyright 2019 ROBOTIS CO., LTD.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Authors: Darby Lim, Ryan Shim
-
 import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 
-#TURTLEBOT3_MODEL = os.environ['TURTLEBOT3_MODEL']
+HERE = os.path.dirname(os.path.realpath(__file__))
+TI_MODEL = os.path.join(HERE, '..', 'models', 'TI_n1', 'model.sdf')
 
-world = '/home/ecervera/Documents/GitHub/IR2121/Worlds/models/burger_ti.model'
 
 def generate_launch_description():
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    #world_file_name = 'turtlebot3_houses/' + TURTLEBOT3_MODEL + '.model'
-    #world = os.path.join(get_package_share_directory('turtlebot3_gazebo'),
-    #                     'worlds', world_file_name)
-    launch_file_dir = os.path.join(get_package_share_directory('turtlebot3_gazebo'), 'launch')
-    pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
+    x_pose = LaunchConfiguration('x_pose')
+    y_pose = LaunchConfiguration('y_pose')
+    empty_world = os.path.join(
+        get_package_share_directory('turtlebot3_gazebo'), 'launch', 'empty_world.launch.py')
 
     return LaunchDescription([
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')
-            ),
-            launch_arguments={'world': world}.items(),
-        ),
+        DeclareLaunchArgument('x_pose', default_value='0.0'),
+        DeclareLaunchArgument('y_pose', default_value='0.0'),
 
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py')
-            ),
+            PythonLaunchDescriptionSource(empty_world),
+            launch_arguments={'x_pose': x_pose, 'y_pose': y_pose}.items(),
         ),
 
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([launch_file_dir, '/robot_state_publisher.launch.py']),
-            launch_arguments={'use_sim_time': use_sim_time}.items(),
-        ),
+        TimerAction(period=5.0, actions=[
+            Node(
+                package='gazebo_ros',
+                executable='spawn_entity.py',
+                arguments=['-entity', 'TI_n1', '-file', TI_MODEL, '-x', '0', '-y', '0', '-z', '0'],
+                output='screen',
+            ),
+        ]),
     ])

@@ -1,9 +1,9 @@
+#!/bin/bash
 #en esta forma no crea copias distintas, sustituye al original ./map
 #source /opt/ros/humble/setup.bash
 #export ROS_LOCALHOST_ONLY=1
 #ros2 run nav2_map_server map_saver_cli -f ./map
 
-#!/bin/bash
 
 # Cargar el entorno de ROS 2
 source /opt/ros/humble/setup.bash
